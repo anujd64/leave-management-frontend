@@ -20,7 +20,7 @@ export default function Contact() {
           <ul className="list-disc ml-6 mt-4">
             <li>Email: contact@example.com</li>
             <li>Phone: +123-456-7890</li>
-            <li>Address: 1234 Example St, City, Country</li>
+            <li>Address: 1234  City, Country</li>
           </ul>
         </div>
       </div>
