@@ -11,15 +11,15 @@ const leaveHistoryData = [
   },
   {
     id: 2,
-    startDate: "2023-04-15",
-    endDate: "2023-04-18",
+    startDate: "2024-04-15",
+    endDate: "2024-04-18",
     type: "Sick Leave",
     status: "Approved"
   },
   {
     id: 3,
-    startDate: "2023-05-20",
-    endDate: "2023-05-21",
+    startDate: "2024-05-20",
+    endDate: "2024-05-21",
     type: "Personal Leave",
     status: "Pending"
   },
