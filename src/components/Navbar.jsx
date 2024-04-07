@@ -1,7 +1,9 @@
 import { Link } from "react-router-dom";
+import { useContext } from 'react';
+import GlobalContext from '../context/GlobalContext';
 
 export default function Navbar() {
-  const loggedIn = localStorage.getItem("token");
+  const token = useContext(GlobalContext).token;
   const logout = () => {
     localStorage.clear();
     window.location.href = "/";
@@ -24,7 +26,7 @@ export default function Navbar() {
         </li>
         </div>
         <div>
-        {loggedIn && <li className=" cursor-pointer" onClick={logout}>Logout</li>}
+        {token && <li className=" cursor-pointer" onClick={logout}>Logout</li>}
         </div>
       </ul>
     </nav>

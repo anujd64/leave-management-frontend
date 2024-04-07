@@ -1,9 +1,8 @@
 import { useEffect, useState } from "react";
 import Layout from "../components/Layout";
 
-export default function RegisterForm({ handleLoginClick }) {
+export default function RegisterForm() {
   const [departments, setDepartments] = useState([]);
-
   const [formDataFinal, setFormDataFinal] = useState({});
 
   const handleSubmit = (e) => {
@@ -56,7 +55,7 @@ export default function RegisterForm({ handleLoginClick }) {
 
   return (
     <Layout>
-      <div className="flex flex-col items-center justify-center w-full h-full text-white">
+      <div className="flex flex-col items-center justify-center w-full h-screen text-white">
         <h1 className="text-3xl font-bold">Register Form</h1>
         <form
           className="flex flex-col py-4 w-2/4 items-center justify-center gap-3 font-semibold"

@@ -1,7 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
+import GlobalContext from "../context/GlobalContext";
 export default function HolidayDetails() {
   const [holidayData, setHolidayData] = useState([]);
-  const token = localStorage.getItem("token");
+  const token = useContext(GlobalContext).token;
+  console.log("token in HolidayDetails: ", token);
 
   useEffect(() => {
     const myHeaders = new Headers();
@@ -30,9 +32,9 @@ export default function HolidayDetails() {
   }, []);
 
   return (
-    <div className="flex flex-col w-1/2">
+    <div className="flex flex-col lg:w-1/2">
       <div className="flex flex-col w-full h-screen gap-4 px-4 justify-start scroll whitespace-nowrap overflow-y-auto">
-        <p className="text-2xl text-white font-bold w-full self-start px-2 py-4">
+        <p className="text-2xl text-white font-bold w-full self-start">
           List of Company Holidays
         </p>
         {holidayData &&
@@ -42,7 +44,7 @@ export default function HolidayDetails() {
               className="flex flex-row justify-between w-[90%] p-4 bg-gray-200 border drop-shadow-lg rounded-lg"
             >
               <p>{holiday.description}</p>
-              <p>{holiday.holidayDate}</p>
+              <p>{new Date(holiday.holidayDate).toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
             </div>
           ))}
       </div>

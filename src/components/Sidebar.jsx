@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import './Sidebar.css';
 import { FaHome, FaCalendar, FaCog } from "react-icons/fa";
 import { IoPersonSharp } from "react-icons/io5";
+import { NavLink } from 'react-router-dom';
 
 function Sidebar() {
   const [activeTab, setActiveTab] = useState('/');
@@ -32,7 +33,6 @@ function Sidebar() {
 
   const handleSidebarClick = (link) => {
     setActiveTab(link);
-    window.location.pathname = link;
   };
 
   return (
@@ -42,10 +42,11 @@ function Sidebar() {
           {SidebarData.map((val, key) => {
             return (
               <li key={key}
-                className={activeTab === val.link ? "row active" : "row"}
-                onClick={() => handleSidebarClick(val.link)}>
-                <div id='icon'>{val.icon}</div><div id='title'>{val.title}</div>
-              </li>
+              className={activeTab === val.link ? "row active" : "row"}
+              onClick={() => handleSidebarClick(val.link)}>
+              <NavLink to={val.link} id='icon'>{val.icon}</NavLink>
+              <NavLink to={val.link} id='title'>{val.title}</NavLink>
+            </li>
             )
           })}
         </ul>
