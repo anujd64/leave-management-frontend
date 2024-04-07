@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import './Sidebar.css';
-import { FaHome, FaCalendar, FaCog } from "react-icons/fa";
+import { FaHome, FaCalendar, FaCog,FaHistory } from "react-icons/fa";
 import { IoPersonSharp } from "react-icons/io5";
 
 function Sidebar() {
@@ -23,10 +23,16 @@ function Sidebar() {
       icon: <FaCalendar/>
     },
     {
+      title: 'Leave History',
+      link: '/leave-history',
+      icon: <FaHistory />
+    },
+    {
       title: 'Settings',
       link: '/settings',
       icon: <FaCog/>
     }
+   
   ];
   
 

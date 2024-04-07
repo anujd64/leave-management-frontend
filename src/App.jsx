@@ -7,6 +7,7 @@ import RegisterForm from './pages/RegisteForm'
 import Leave from './pages/Leave'
 import Profile from './pages/Profile'
 import Settings from './pages/Settings'
+import LeaveHistory from './pages/LeaveHistory'
 
 function App() {
 
@@ -46,10 +47,16 @@ function App() {
       ,
     },
     {
+      path: '/leave-history',
+      element: <> <LeaveHistory /> </>
+      ,
+    },
+    {
       path: '/contact',
       element: <> <Contact /> </>
       ,
     },
+    
   ])
 
   return (
