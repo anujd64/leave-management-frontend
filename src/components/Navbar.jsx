@@ -1,12 +1,13 @@
-import { Link } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 import { useContext } from 'react';
 import GlobalContext from '../context/GlobalContext';
 
 export default function Navbar() {
   const token = useContext(GlobalContext).token;
+  const username = useContext(GlobalContext).username;
   const logout = () => {
     localStorage.clear();
-    window.location.href = "/";
+    window.location.href = "/login";
   };
 
   return (
@@ -16,18 +17,21 @@ export default function Navbar() {
       <ul className="flex flex-row items-center justify-between gap-4 font-bold text-white px-12">
         <div className="flex flex-row gap-4">
         <li>
-          <Link to="/">Home</Link>
+          <NavLink to={token ? "/": "/login"}>Home</NavLink>
         </li>
         <li>
-          <Link to="/about">About</Link>
+          <NavLink to="/about">About</NavLink>
         </li>
         <li>
-          <Link to="/contact">Contact Us</Link>
+          <NavLink to="/contact">Contact Us</NavLink>
         </li>
         </div>
         <div>
         {token && <li className=" cursor-pointer" onClick={logout}>Logout</li>}
         </div>
+        <p className="font-semibold text-gray-400">
+          {token && <NavLink to="/profile">{username}</NavLink>}
+        </p>
       </ul>
     </nav>
   );

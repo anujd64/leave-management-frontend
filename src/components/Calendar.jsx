@@ -9,6 +9,8 @@ export default function Calendar() {
 
   const [currentMonth, setCurrentMonth] = useState(getMonth());
 
+  const token = useContext(GlobalContext).token;
+
   useEffect(() => {
     setCurrentMonth(getMonth(monthIndex));
   }, [monthIndex]);
@@ -24,11 +26,34 @@ export default function Calendar() {
     setMonthIndex(dayjs().month());
   }
 
+  const [holidayData, setHolidayData] = useState([]);
+
+  useEffect(() => {
+    const myHeaders = new Headers();
+    myHeaders.append("Authorization", `Bearer ${token}`);
+
+    const requestOptions = {
+      method: "GET",
+      headers: myHeaders,
+    };
+
+    const getHolidays = async () =>
+      fetch("http://localhost:8080/company-holidays/all", requestOptions)
+        .then((response) => response.json())
+        .then((result) => {
+          setHolidayData(result);
+          console.log(result);
+        })
+        .catch((error) => console.error(error));
+    getHolidays();
+  }, []);
+  
+
   return (
     <>
-    <div className='flex flex-col items-center justify-center p-4 '>
+    <div className='flex flex-col h-full items-center justify-center p-4'>
     <CalendarHeader currentMonth={currentMonth} increment={increment} decrement={decrement} handleClick={handleTodayClick} />
-    {currentMonth && <Month month={currentMonth} />}
+    {currentMonth && <Month month={currentMonth} holidayData={holidayData} />}
     </div>
     </>
   )
