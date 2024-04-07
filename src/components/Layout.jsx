@@ -6,7 +6,7 @@ import GlobalContext from '../context/GlobalContext';
 
 const Layout = ({ children }) => {
   const token = useContext(GlobalContext).token;
-      
+
   return (
     <div className="flex flex-col items-center justify-center bg-gray-900">
       <Navbar/>

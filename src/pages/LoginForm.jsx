@@ -23,33 +23,40 @@ export default function LoginForm() {
       localStorage.setItem("employeeId", loginData.userDetails.employeeId);
       localStorage.setItem("username", loginData.userDetails.username);
       localStorage.setItem("email", loginData.userDetails.email);
+      localStorage.setItem("isManager", loginData.userDetails.isManager);
+      localStorage.setItem("departmentId", loginData.userDetails.departmentId);
 
       window.location.href = "/";
     }
   }, [loginData]);
 
   useEffect(() => {
-    const createEmployee = async () => {
-      const requestOptions = {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formDataFinal),
-      };
-      await fetch("http://localhost:8080/auth/login-employee", requestOptions)
-        .then((response) =>
-         response.json()
-        )
-        .then((data) => {
-          setLoginData(data);
-          console.log(data);
-        })
-        .catch((error) => {
-          console.log("error: ", JSON.stringify(error));
-          // setErrorMessage(error);
-        });
+    const loginEmployee = async () => {
+      try {
+        const requestOptions = {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(formDataFinal),
+        };
+        const response = await fetch("http://localhost:8080/auth/login-employee", requestOptions);
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.errMsg || "Unknown error occurred");
+        }
+        const data = await response.json();
+        setLoginData(data);
+      } catch (error) {
+        console.log("Error:", error.message);
+        setErrorMessage(error.message);
+      }
     };
-    createEmployee();
+
+    if (Object.keys(formDataFinal).length !== 0) { 
+      loginEmployee();
+    }
+    
   }, [formDataFinal]);
+  
 
   return (
     <Layout>

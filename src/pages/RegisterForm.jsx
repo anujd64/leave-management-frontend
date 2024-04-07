@@ -4,6 +4,7 @@ import Layout from "../components/Layout";
 export default function RegisterForm() {
   const [departments, setDepartments] = useState([]);
   const [formDataFinal, setFormDataFinal] = useState({});
+  const [errorMessage, setErrorMessage] = useState("");
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -19,23 +20,31 @@ export default function RegisterForm() {
 
   useEffect(() => {
     const createEmployee = async () => {
-      const requestOptions = {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formDataFinal),
-      };
-      fetch("http://localhost:8080/auth/create-employee", requestOptions)
-        .then((response) => {
-          if(response.status === 200) {
-            window.location.href = "/login";
-          }
-          response.json()
+      try {
+        const requestOptions = {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(formDataFinal),
+        };
+        const response = await fetch("http://localhost:8080/auth/create-employee", requestOptions);
+        if (!response.ok) {
+          const errorData = await response.json();
+          setErrorMessage(errorData.errMsg || "Unknown error occurred");
         }
-      )
-        .then((data) => console.log(data))
-        .catch((error) => console.log(error));
+        const data = await response.json();
+        if(data){
+          window.location.href = "/login";
+        }
+      } catch (error) {
+        console.log("Error:", error.message);
+        setErrorMessage(error.message);
+      }
     };
-    createEmployee();
+
+    if (Object.keys(formDataFinal).length !== 0) { 
+      createEmployee();
+    }
+    
   }, [formDataFinal]);
 
   useEffect(() => {
@@ -154,6 +163,7 @@ export default function RegisterForm() {
             Register
           </button>
         </form>
+        {errorMessage && <span className="text-red-500">{errorMessage}</span>}
         <p className="text-center text-gray-400">
           Already have an account ? <span> </span>
           <a href="/login" className="text-blue-700">
