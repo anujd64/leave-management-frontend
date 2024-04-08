@@ -23,8 +23,8 @@ export default function LoginForm() {
       localStorage.setItem("employeeId", loginData.userDetails.employeeId);
       localStorage.setItem("username", loginData.userDetails.username);
       localStorage.setItem("email", loginData.userDetails.email);
-      localStorage.setItem("isManager", loginData.userDetails.isManager);
-      localStorage.setItem("departmentId", loginData.userDetails.departmentId);
+      localStorage.setItem("isManager", loginData.userDetails.isManager.toString());
+      localStorage.setItem("departmentId", loginData.userDetails.departmentId.toString());
 
       window.location.href = "/";
     }
@@ -60,12 +60,13 @@ export default function LoginForm() {
 
   return (
     <Layout>
-      <div className="flex flex-col items-center justify-center w-full h-screen text-white">
-        <h1 className="text-3xl font-bold">Login Form</h1>
+      <>
+      <div className="flex flex-col items-center justify-top w-full h-screen text-white">
         <form
-          className="flex flex-col py-4 w-2/4 items-center justify-center gap-3 font-semibold"
+          className="flex flex-col p-8 m-8 bg-gray-800 drop-shadow-lg rounded-lg w-1/2 items-center justify-center gap-3 font-semibold"
           onSubmit={(e) => handleSubmit(e)}
         >
+        <h1 className="text-3xl font-bold">Login Form</h1>
           <div className="grid grid-cols-2 grid-rows-1">
             <label>Username</label>
             <input
@@ -82,7 +83,7 @@ export default function LoginForm() {
               name="password"
               placeholder="Password"
               className="border-2 px-4 py-2 rounded-lg text-black"
-            />
+              />
           </div>
           <button className=" self-center p-3 px-6 bg-blue-400 rounded-lg">
             Log in
@@ -96,6 +97,7 @@ export default function LoginForm() {
           </a>
         </p>
       </div>
+              </>
     </Layout>
   );
 }
