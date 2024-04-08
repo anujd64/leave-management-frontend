@@ -146,19 +146,20 @@ export default function ManageLeaves() {
             <p className="text-2xl text-white font-bold w-full self-start">
               Manage Leaves
             </p>
-            <div className="grid grid-rows-1 grid-cols-6 text-center text-white font-bold ">
+            <div className="grid grid-rows-1 grid-cols-7 text-center text-white font-bold ">
               <p>Employee Name</p>
               <p>From</p>
               <p>To</p>
               <p>Status</p>
               <p>Reason</p>
+              <p>Your Feedback</p>
               <p>Actions</p>
             </div>
             {leaveHistory &&
               leaveHistory.map((leave,idx) => (
                 <div
                   key={idx}
-                  className=" grid grid-cols-6 py-4 items-center justify-center text-center bg-gray-200 rounded-lg"
+                  className=" grid grid-cols-7 py-4 items-center justify-center text-center bg-gray-200 rounded-lg"
                 >
                   <p>{empDetails[leave.employeeId]}</p>
                   <p>
@@ -177,6 +178,7 @@ export default function ManageLeaves() {
                   </p>
                   <p>{leave.status}</p>
                   <p>{leave.reason ? leave.reason : "NA"}</p>
+                  <p>{leave.managerFeedback}</p>
 
                     
                   <div className="flex flex-row gap-4 w-full justify-center cursor-pointer">

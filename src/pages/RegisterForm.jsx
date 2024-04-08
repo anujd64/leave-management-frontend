@@ -30,10 +30,11 @@ export default function RegisterForm() {
         if (!response.ok) {
           const errorData = await response.json();
           setErrorMessage(errorData.errMsg || "Unknown error occurred");
-        }
-        const data = await response.json();
-        if(data){
-          window.location.href = "/login";
+        }else{
+          const data = await response.json();
+          if(data){
+            window.location.href = "/login";
+          }
         }
       } catch (error) {
         console.log("Error:", error.message);
@@ -64,12 +65,12 @@ export default function RegisterForm() {
 
   return (
     <Layout>
-      <div className="flex flex-col items-center justify-center w-full h-screen text-white">
-        <h1 className="text-3xl font-bold">Register Form</h1>
+      <div className="flex flex-col items-center justify-top w-full h-screen text-white">
         <form
-          className="flex flex-col py-4 w-2/4 items-center justify-center gap-3 font-semibold"
+          className="flex flex-col p-8 px-12 m-8 bg-gray-800 drop-shadow-lg rounded-lg w-2/4 items-center justify-center gap-3 font-semibold"
           onSubmit={(e) => handleSubmit(e)}
         >
+        <h1 className="text-3xl font-bold">Register Form</h1>
           <div className="grid grid-cols-2 grid-rows-1">
             <label>Username</label>
             <input

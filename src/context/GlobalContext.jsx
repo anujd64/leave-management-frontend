@@ -10,7 +10,9 @@ const GlobalContext = React.createContext({
     username: "",
     setUsername: (username) => {},
     isManager: false,
-    departmentId: "",
+    departmentId: "", 
+    sidebarVisible: true, 
+    setSidebarVisible: (visible) => {}
 });
 
 export default GlobalContext;
