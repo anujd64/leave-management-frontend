@@ -12,7 +12,9 @@ const GlobalContext = React.createContext({
     isManager: false,
     departmentId: "", 
     sidebarVisible: true, 
-    setSidebarVisible: (visible) => {}
+    setSidebarVisible: (visible) => {},
+    activeTab: "",
+    setActiveTab: (tab) => {},
 });
 
 export default GlobalContext;

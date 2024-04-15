@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from "react";
 import GlobalContext from "../context/GlobalContext";
-import LeaveHistory from "./LeaveHistory";
 import dayjs from "dayjs";
+
 const LeaveRequestForm = () => {
   const [leaveTypes, setLeaveTypes] = useState([]);
   const [successMessage, setSuccessMessage] = useState("");
@@ -15,14 +15,14 @@ const LeaveRequestForm = () => {
     reason: "",
     employeeId: useContext(GlobalContext).employeeId,
     status: "pending",
-    managerFeedback: " ",
+    managerFeedback: "",
     createdAt: "",
     updatedAt: "",
   });
+  
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [holidayData, setHolidayData] = useState([]);
   const holidays = holidayData.map((holiday) => holiday.holidayDate);
-  console.log("token in HolidayDetails: ", token);
 
   useEffect(() => {
     const myHeaders = new Headers();
@@ -83,7 +83,6 @@ const LeaveRequestForm = () => {
   const debouncedSubmit = debounce(() => {
     if (!isSubmitting) {
       setIsSubmitting(true);
-      setErrorMessage("");
       const myHeaders = new Headers();
       myHeaders.append("authorization", `Bearer ${token}`);
       myHeaders.append("Content-Type", "application/json");
@@ -95,16 +94,23 @@ const LeaveRequestForm = () => {
       };
 
       fetch("http://localhost:8080/leaves/create-leave", requestOptions)
-        .then((response) => response.json())
+        .then((response) => {
+          return response.json();
+        })
         .then((result) => {
           setIsSubmitting(false);
+          if(result.errMsg){
+            setErrorMessage(result.errMsg);
+            return;
+          }
           setSuccessMessage("Leave request submitted successfully.");
           console.log(result);
         })
         .catch((error) => {
           setIsSubmitting(false);
-          setErrorMessage("Failed to submit leave request. Please try again.");
+          setErrorMessage(error.errMsg || "Unknown error occurred");
           console.error(error);
+          console.error(error.errMsg);
         });
     }
   }, 500);
@@ -119,6 +125,9 @@ const LeaveRequestForm = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    setErrorMessage("");
+    setSuccessMessage("");
   
     const { startDate, endDate } = leaveRequest;
   
@@ -141,6 +150,12 @@ const LeaveRequestForm = () => {
       setErrorMessage(`${ isStartLessThanToday ? "start date": "end date"} cannot be less than today`);
       return;
     }
+
+    // Check if start date is after end date
+    if (startDateObj.isAfter(endDateObj, 'day')) {
+      setErrorMessage("Start date cannot be after end date");
+      return;
+    }
   
     // Check if the difference between start and end dates is more than 7 days
     const differenceInDays = endDateObj.diff(startDateObj, 'day');
@@ -156,16 +171,19 @@ const LeaveRequestForm = () => {
       setErrorMessage(`Leave cannot be applied for on holidays, ${isEndDateHoliday ? "end date" : "start date"} is a holiday`);
       return;
     }
+
+    console.log("Leave Request Data: ", leaveRequest);
   
     // If all checks pass, proceed with submitting the leave request
     debouncedSubmit();
   };
+
   return (
     <>
       
           <form
             onSubmit={handleSubmit}
-            className="max-w-md mx-auto mt-8 shadow-md p-6 bg-white rounded-md"
+            className="w-1/3 mx-auto mt-8 shadow-md p-6 my-8 bg-white rounded-md"
           >
             <h2 className="text-lg font-semibold mb-4">Leave Request Form</h2>
             <div className="mb-4">
@@ -204,7 +222,7 @@ const LeaveRequestForm = () => {
                 name="startDate"
                 value={leaveRequest.startDate}
                 onChange={handleChange}
-                className="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+                className="mt-1 focus:ring-blue-500 focus:border-blue-500 px-2 py-3 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
               />
             </div>
             <div className="mb-4">
@@ -217,19 +235,22 @@ const LeaveRequestForm = () => {
                 name="endDate"
                 value={leaveRequest.endDate}
                 onChange={handleChange}
-                className="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+                className="mt-1 focus:ring-blue-500 focus:border-blue-500 px-2 py-3 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
               />
             </div>
             <div className="mb-4">
-              <label htmlFor="reason" className="block text-sm font-medium ">
+              <label htmlFor="reason" className="block text-sm font-medium">
+                <div className="flex gap-2">
                 Reason:
+                </div>
               </label>
               <textarea
                 id="reason"
                 name="reason"
                 value={leaveRequest.reason}
                 onChange={handleChange}
-                className="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+                className="mt-1 focus:ring-blue-500 focus:border-blue-500 px-2 py-3 border block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+                required
               ></textarea>
             </div>
             <div className="mt-6">
@@ -240,7 +261,6 @@ const LeaveRequestForm = () => {
                 Submit
               </button>
             </div>
-          </form>
           {successMessage && (
             <div className="text-green-500 text-center mt-4">
               {successMessage}
@@ -249,6 +269,7 @@ const LeaveRequestForm = () => {
           {errorMessage && (
             <div className="text-red-500 text-center mt-4">{errorMessage}</div>
           )}
+          </form>
     </>
   );
 };

@@ -51,7 +51,7 @@ export default function Calendar() {
 
   return (
     <>
-    <div className='flex flex-col h-full items-center justify-center p-4'>
+    <div className='flex flex-col h-full py-4 w-[85%] items-center justify-center'>
     <CalendarHeader currentMonth={currentMonth} increment={increment} decrement={decrement} handleClick={handleTodayClick} />
     {currentMonth && <Month month={currentMonth} holidayData={holidayData} />}
     </div>
