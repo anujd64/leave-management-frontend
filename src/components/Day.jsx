@@ -20,13 +20,13 @@ export default function Day({day, rowIdx, holidayData}) {
 
 
     return (
-        <div className="text-black flex flex-col border border-gray-200 rounded-lg text-center">
-        <header className="flex-col items-center">  
+        <div className="text-black flex flex-col border border-gray-200 rounded-lg w-full">
+        <header className="flex-col items-center w-full text-center justify-center ">  
             {
                 rowIdx === 0 && <p className="text-sm mt-1">{day.format('ddd').toUpperCase()}</p>
             }
             <p className={`text-sm px-2 py-1.5 w-fit my-1 text-center ${getCurrentDayClass()}`}>{day.format('DD')}</p>
-            <div className="flex flex-col items-center">
+            <div className="flex flex-col items-center w-full">
                 {
                     dayEvents.map((event) => (
                         <p key={event.holidayId} className="text-xs text-center w-full py-1 bg-blue-400 rounded-md">{event.description}</p>

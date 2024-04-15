@@ -14,7 +14,7 @@ export default function Navbar() {
     <nav className="flex sticky justify-between items-center content-center top-0 py-4 backdrop-blur-sm text-xl font-bold shadow-lg z-50 w-full"
       role="navigation"
     >
-      <ul className="flex flex-row items-center justify-between gap-4 font-bold text-white px-12">
+      <ul className="flex flex-row items-center justify-between gap-4 font-bold text-white lg:px-12 md:px-12 px-4">
         <div className="flex flex-row gap-4">
         <li>
           <NavLink to={token ? "/": "/login"}>Home</NavLink>

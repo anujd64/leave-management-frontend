@@ -2,7 +2,9 @@ import { useEffect, useState } from "react";
 import { useContext } from 'react';
 import GlobalContext from '../context/GlobalContext';
 
-export default function LeaveBalance() {
+export default function LeaveBalance(
+  className
+) {
   const [approvedLeavesData, setApprovedLeavesData] = useState([]);
 
   const token = useContext(GlobalContext).token;
@@ -38,32 +40,44 @@ export default function LeaveBalance() {
   }, []);
 
   return (
-    <div className="flex flex-col w-full text-white">
-      <div className="flex flex-row w-full ">
-        <h1 className="text-2xl px-4 font-bold">Leave Balance</h1>
+    <>
+      <div className="flex flex-row w-full">
+        <h1 className="text-2xl px-4 font-bold text-white">Leave Balance</h1>
       </div>
       <div className="flex flex-row items-center justify-evenly gap-4 p-4">
         <Tile
           text="Approved Leaves"
           number={approvedLeavesData.length}
-        />
+          color="text-green-500"
+          />
         <Tile
           text="Remaining Leaves"
           number={totalLeavesAllowed - approvedLeavesData.length}
-        />
-        <Tile text="Total Leaves" number={totalLeavesAllowed} />
+          color="text-yellow-500"
+          />
+        <Tile text="Total Leaves" number={totalLeavesAllowed}
+          color="text-blue-500"
+          />
       </div>
-    </div>
+    </>
+    
   );
 }
 
-function Tile({ text, number, color }) {
+export function Tile({ text, number, color }) {
+
+  const getStatusColor = () => {
+    return color;
+  };
+
   return (
     <div
-      className={`flex flex-col gap-4 w-40 h-40 rounded-lg drop-shadow-lg bg-gray-800 items-center justify-center text-center text-xl font-bold`}
+      className={`flex flex-col gap-4 lg:w-56 w-40 h-20 rounded-lg drop-shadow-lg bg-gray-800 items-center justify-center text-center text-white lg:text-lg text-sm font-bold`}
     >
-      <p className="">{text}</p>
-      <p className="">{number}</p>
+      <div className="flex items-center justify-center lg:gap-4 gap-2 lg:flex-nowrap flex-wrap">
+      <p>{text}</p>
+      <p className={`${getStatusColor()}`}>{number}</p>
+      </div>
     </div>
   );
 }

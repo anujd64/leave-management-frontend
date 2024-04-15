@@ -9,9 +9,10 @@ export default function ContextWrapper({ children }) {
     const [username, setUsername] = useState(localStorage.getItem('username'));
     const isManager = useState(localStorage.getItem('isManager'));
     const departmentId = useState(localStorage.getItem('departmentId'));
-    const [sidebarVisible, setSidebarVisible] = useState(true);
+    const [sidebarVisible, setSidebarVisible] = useState(false);
+    const [activeTab, setActiveTab] = useState(location.pathname);
 
-    return <GlobalContext.Provider value={{monthIndex, setMonthIndex, token, setToken, employeeId, setEmployeeId, username, setUsername, isManager, departmentId, sidebarVisible, setSidebarVisible}}>
+    return <GlobalContext.Provider value={{monthIndex, setMonthIndex, token, setToken, employeeId, setEmployeeId, username, setUsername, isManager, departmentId, sidebarVisible, setSidebarVisible, activeTab, setActiveTab}}>
         {children}
         </GlobalContext.Provider>;
 }

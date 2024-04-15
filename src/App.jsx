@@ -4,6 +4,7 @@ import About from './pages/About'
 import Contact from './pages/Contact'
 import LoginForm from './pages/LoginForm'
 import RegisterForm from './pages/RegisterForm'
+import LeaveHistory from "./pages/LeaveHistory";
 import Leave from './pages/Leave'
 import ManageLeaves from './pages/ManageLeaves'
 import Profile from './pages/Profile'
@@ -27,9 +28,12 @@ function App() {
       element:<> <RegisterForm /> </>
     },
     {
-      path: '/leave',
+      path: '/apply-leave',
       element:<> <Leave /> </>
-      
+    },
+    {
+      path: '/leave-history',
+      element:<> <LeaveHistory /> </>
     }, 
     {
       path: '/manage-leaves',
@@ -40,11 +44,7 @@ function App() {
       element:<> <Profile /> </>
       
     },
-    {
-      path: '/settings',
-      element:<> <Settings /> </>
-      
-    },
+    
     {
       path: '/about',
       element:<> <About /> </>

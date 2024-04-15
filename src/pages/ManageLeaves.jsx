@@ -1,21 +1,46 @@
 import Layout from "../components/Layout";
 import React, { useContext, useEffect, useState } from "react";
 import GlobalContext from "../context/GlobalContext";
-import { MdDeleteOutline } from "react-icons/md";
-import { IoCheckmarkSharp } from "react-icons/io5";
-import Modal from "../components/Modal";
-import HelperToolTip from "../components/HelperToolTip";
+import LeaveRequestCard from "../components/LeaveRequestCard";
+
 export default function ManageLeaves() {
   const token = useContext(GlobalContext).token;
   const employeeId = useContext(GlobalContext).employeeId;
   const deptId = useContext(GlobalContext).departmentId;
   const [leaveHistory, setLeaveHistory] = useState([]);
+  const [filteredLeaveHistory, setFilteredLeaveHistory] = useState([]);
+  const [filterName, setFilterName] = useState("all");
   const [empDetails, setEmpDetails] = useState([]);
+  const [holidayData, setHolidayData] = useState([]);
 
+  const myHeaders = new Headers();
+    myHeaders.append("Authorization", `Bearer ${token}`);
 
+    const requestOptions = {
+      method: "GET",
+      headers: myHeaders,
+    };
+
+  const getHolidays = async () =>
+    fetch("http://localhost:8080/company-holidays/all", requestOptions)
+      .then((response) => response.json())
+      .then((result) => {
+        result.sort(
+          (a, b) => new Date(a.holidayDate) - new Date(b.holidayDate)
+        );
+        result = result.filter(
+          (holiday) => new Date(holiday.holidayDate) >= new Date()
+        );
+        setHolidayData(result);
+        console.log(result);
+      })
+      .catch((error) => console.error(error));
+
+  useEffect(() => {
+    getHolidays();
+  }, []);
 
   const getLeaveHistory = () => {
-
     const myHeaders = new Headers();
     myHeaders.append("authorization", `Bearer ${token}`);
 
@@ -33,17 +58,22 @@ export default function ManageLeaves() {
       })
       .then((data) => {
         console.log("leaves:", data);
-        const filteredLeaveHistory = data.leaveRequests.filter((leave) => leave.employeeId !== employeeId);
-        setLeaveHistory(filteredLeaveHistory);
-        setEmpDetails(data.employeeIdUsernames);
+        const filteredLeaveHistoryX = data.leaveRequests.filter(
+          (leave) => leave.employeeId !== employeeId
+        );
+        filteredLeaveHistoryX.sort(
+          (a, b) => new Date(a.startDate) - new Date(b.startDate)
+        );
+        setLeaveHistory(filteredLeaveHistoryX);
+        setFilteredLeaveHistory(filteredLeaveHistoryX);
+        setEmpDetails(data.employeeDetails);
       })
       .catch((error) => console.error(error));
   };
-  
+
   useEffect(() => {
     getLeaveHistory();
   }, []);
-  
 
   const handleApprove = (leaveId) => {
     const myHeaders = new Headers();
@@ -72,6 +102,15 @@ export default function ManageLeaves() {
               : leave
           )
         );
+        setFilteredLeaveHistory(
+          leaveHistory.map((leave) =>
+            leave.requestId === leaveId
+              ? { ...leave, status: "approved" }
+              : leave
+          )
+        );
+
+        setFilterName("all")
       })
       .catch((error) => console.error(error));
   };
@@ -103,112 +142,120 @@ export default function ManageLeaves() {
         setLeaveHistory(
           leaveHistory.map((leave) =>
             leave.requestId === requestId
-              ? { ...leave, status: "rejected" }
+              ? { ...leave, status: "rejected", managerFeedback: reason }
               : leave
           )
         );
-      })
-      .catch((error) => console.error(error));
-  };
-
-  const handleDelete = (leaveId) => {
-    const myHeaders = new Headers();
-    myHeaders.append("authorization", `Bearer ${token}`);
-    myHeaders.append("Content-Type", "application/json");
-
-    const requestOptions = {
-      method: "DELETE",
-      headers: myHeaders,
-    };
-
-    fetch(
-      `http://localhost:8080/leaves/delete-leave/${leaveId}`,
-      requestOptions
-    )
-      .then((response) => {
-        console.log("deleted response:", response);
-        response.json();
-      })
-      .then((result) => {
-        console.log("deleted result:", result);
-        setLeaveHistory(
-          leaveHistory.filter((leave) => leave.requestId !== leaveId)
+        setFilteredLeaveHistory(
+          leaveHistory.map((leave) =>
+            leave.requestId === requestId
+              ? { ...leave, status: "rejected", managerFeedback: reason }
+              : leave
+          )
         );
+
+        setFilterName("all")
+
       })
       .catch((error) => console.error(error));
   };
+
+  const filterLeaveHistory = (status) => {
+    return () => {
+      setFilterName(status);
+      if (status === "all") {
+        setFilteredLeaveHistory(leaveHistory);
+      } else {
+        const filteredLeaveHistory = leaveHistory.filter(
+          (leave) => leave.status === status
+        );
+        setFilteredLeaveHistory(filteredLeaveHistory);
+      }
+    };
+  }
+
+  // const handleDelete = (leaveId) => {
+  //   const myHeaders = new Headers();
+  //   myHeaders.append("authorization", `Bearer ${token}`);
+  //   myHeaders.append("Content-Type", "application/json");
+
+  //   const requestOptions = {
+  //     method: "DELETE",
+  //     headers: myHeaders,
+  //   };
+
+  //   fetch(
+  //     `http://localhost:8080/leaves/delete-leave/${leaveId}`,
+  //     requestOptions
+  //   )
+  //     .then((response) => {
+  //       console.log("deleted response:", response);
+  //       response.json();
+  //     })
+  //     .then((result) => {
+  //       console.log("deleted result:", result);
+  //       setLeaveHistory(
+  //         leaveHistory.filter((leave) => leave.requestId !== leaveId)
+  //       );
+  //     })
+  //     .catch((error) => console.error(error));
+  // };
 
   return (
     <Layout>
-      <div className="w-full">
-        <div className="flex flex-col w-full">
-          <div className="flex flex-col w-full h-screen gap-4 px-4 justify-start scroll whitespace-nowrap overflow-y-auto">
-            <p className="text-2xl text-white font-bold w-full self-start">
-              Manage Leaves
+      <div className="flex flex-col w-full h-full px-8 py-2 select-none">
+        <div className="flex flex-col flex-wrap w-full h-full gap-4">
+          <p className="text-2xl text-white font-bold w-full text-start">
+            Manage Leaves
+          </p>
+          <div className="flex flex-row gap-4">
+            <p className={`self-start rounded-full border text-xs w-fit h-fit px-4 py-2 border-gray-200 text-gray-300 cursor-pointer
+            ${filterName === "all" ? "bg-gray-300 text-gray-800" : ""}`}
+            onClick={filterLeaveHistory("all")}
+            >
+              All
             </p>
-            <div className="grid grid-rows-1 grid-cols-7 text-center text-white font-bold ">
-              <p>Employee Name</p>
-              <p>From</p>
-              <p>To</p>
-              <p>Status</p>
-              <p>Reason</p>
-              <p>Your Feedback</p>
-              <p>Actions</p>
-            </div>
-            {leaveHistory &&
-              leaveHistory.map((leave,idx) => (
-                <div
-                  key={idx}
-                  className=" grid grid-cols-7 py-4 items-center justify-center text-center bg-gray-200 rounded-lg"
-                >
-                  <p>{empDetails[leave.employeeId]}</p>
-                  <p>
-                    {new Date(leave.startDate).toLocaleDateString("en-US", {
-                      day: "numeric",
-                      month: "long",
-                      year: "numeric",
-                    })}
-                  </p>
-                  <p>
-                    {new Date(leave.endDate).toLocaleDateString("en-US", {
-                      day: "numeric",
-                      month: "long",
-                      year: "numeric",
-                    })}
-                  </p>
-                  <p>{leave.status}</p>
-                  <p>{leave.reason ? leave.reason : "NA"}</p>
-                  <p>{leave.managerFeedback}</p>
-
-                    
-                  <div className="flex flex-row gap-4 w-full justify-center cursor-pointer">
-                    {leave.status !== "approved" &&
-                      leave.status !== "rejected" && (
-                        <>
-                        <button onClick={() => handleApprove(leave.requestId)} className="group relative">
-                          <IoCheckmarkSharp />
-                        <HelperToolTip text="Approve"/>
-                        </button>
-                        </>
-                        
-                      )}
-                    {leave.status !== "rejected" && 
-                    (<> 
-                    <Modal
-                      handleReject={handleReject}
-                      requestId={leave.requestId}
-                      />
-                      </> 
-                    )}
-
-                    <button onClick={() => handleDelete(leave.requestId)} className="group relative">
-                      <MdDeleteOutline />
-                      <HelperToolTip text="Delete"/>
-                    </button>
-                  </div>
-                </div>
-              ))}
+            <p className={`self-start rounded-full border text-xs w-fit h-fit px-4 py-2 border-green-300 text-green-500 cursor-pointer ${filterName === "approved" ? "bg-green-300 text-green-800" : ""}`}
+            onClick={filterLeaveHistory("approved")}
+            >
+              Approved
+            </p>
+            <p className={`self-start rounded-full border text-xs w-fit h-fit px-4 py-2 border-yellow-300 text-yellow-500 cursor-pointer
+            ${filterName === "pending" ? "bg-yellow-300 text-yellow-800" : ""}`}
+            onClick={filterLeaveHistory("pending")}
+            >
+              Pending
+            </p>
+            <p className={`self-start rounded-full border text-xs w-fit h-fit px-4 py-2 border-red-300 text-red-500 cursor-pointer
+            ${filterName === "rejected" ? "bg-red-300 text-red-800" : ""}`}
+            onClick={filterLeaveHistory("rejected")}
+            >
+              Rejected
+            </p>
           </div>
+
+          <div className="flex flex-row gap-4 flex-wrap w-full justify-evenly">
+            
+          {filteredLeaveHistory.length > 0 ? (
+            <>
+              {filteredLeaveHistory.map((leave, idx) => (
+                <LeaveRequestCard
+                  key={idx}
+                  employeeDetails={empDetails[leave.employeeId]}
+                  leave={leave}
+                  holidayData={holidayData}
+                  handleApprove={handleApprove}
+                  handleReject={handleReject}
+                />
+              ))}
+            </>
+          ) : (
+            <p className="text-zinc-400 py-4 text-center">
+              No leave requests to manage
+            </p>
+          )}
+          </div>
+
         </div>
       </div>
     </Layout>

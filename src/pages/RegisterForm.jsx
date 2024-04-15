@@ -1,17 +1,27 @@
 import { useEffect, useState } from "react";
 import Layout from "../components/Layout";
+import { setLocalStorageItems } from "../utils/Utils";
 
 export default function RegisterForm() {
   const [departments, setDepartments] = useState([]);
   const [formDataFinal, setFormDataFinal] = useState({});
+  const [submitting, setSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (e.target.password.value !== e.target.confirmPassword.value) {
+      setErrorMessage("Passwords do not match");
+      return;
+    }
+    
     const formData = new FormData(e.target);
     const data = {};
     formData.forEach((value, key) => {
-      data[key] = value;
+
+      if (key !== "confirmPassword") {
+        data[key] = value;
+      }
     });
     data["managerId"] = null;
     setFormDataFinal(data);
@@ -20,6 +30,7 @@ export default function RegisterForm() {
 
   useEffect(() => {
     const createEmployee = async () => {
+      setSubmitting(true);
       try {
         const requestOptions = {
           method: "POST",
@@ -33,11 +44,14 @@ export default function RegisterForm() {
         }else{
           const data = await response.json();
           if(data){
-            window.location.href = "/login";
+            setLocalStorageItems(data);
+            window.location.href = "/";
           }
         }
+        setSubmitting(false);
       } catch (error) {
         console.log("Error:", error.message);
+        setSubmitting(false);
         setErrorMessage(error.message);
       }
     };
@@ -49,10 +63,6 @@ export default function RegisterForm() {
   }, [formDataFinal]);
 
   useEffect(() => {
-    const requestOptions = {
-      method: "GET",
-      headers: { "Content-Type": "application/json" },
-    };
 
     const fetchDepts = () => fetch("http://localhost:8080/departments/all")
       .then((response) => response.json())
@@ -67,7 +77,7 @@ export default function RegisterForm() {
     <Layout>
       <div className="flex flex-col items-center justify-top w-full h-screen text-white">
         <form
-          className="flex flex-col p-8 px-12 m-8 bg-gray-800 drop-shadow-lg rounded-lg w-2/4 items-center justify-center gap-3 font-semibold"
+          className="flex flex-col p-8 lg:px-12 m-8 bg-gray-800 drop-shadow-lg rounded-lg lg:w-1/2 items-center justify-center gap-3 font-semibold"
           onSubmit={(e) => handleSubmit(e)}
         >
         <h1 className="text-3xl font-bold">Register Form</h1>
@@ -78,6 +88,7 @@ export default function RegisterForm() {
               name="username"
               placeholder="Username"
               className="border-2 px-4 py-2 rounded-lg text-black"
+              required
             />
           </div>
           <div className="grid grid-cols-2 grid-rows-1">
@@ -87,6 +98,7 @@ export default function RegisterForm() {
               name="email"
               placeholder="Email"
               className="border-2 px-4 py-2 rounded-lg text-black"
+              required
             />
           </div>
           <div className="grid grid-cols-2 grid-rows-1">
@@ -96,6 +108,7 @@ export default function RegisterForm() {
               name="fullName"
               placeholder="Full Name"
               className="border-2 px-4 py-2 rounded-lg text-black"
+              required
             />
           </div>
           <div className="grid grid-cols-2 grid-rows-1">
@@ -105,14 +118,17 @@ export default function RegisterForm() {
               name="password"
               placeholder="Password"
               className="border-2 px-4 py-2 rounded-lg text-black"
+              required
             />
           </div>
           <div className="grid grid-cols-2 grid-rows-1">
             <label>Confirm Password</label>
             <input
               type="password"
+              name="confirmPassword"
               placeholder="Confirm Password"
               className="border-2 px-4 py-2 rounded-lg text-black"
+              required
             />
           </div>
           <div className="grid grid-rows-1 grid-cols-3 gap-4">
@@ -160,17 +176,18 @@ export default function RegisterForm() {
           <button
             className=" self-center p-3 px-6 bg-blue-400 rounded-lg"
             type="submit"
+            disabled={submitting}
           >
-            Register
+            {submitting ? "Registering" : "Register"}
           </button>
-        </form>
-        {errorMessage && <span className="text-red-500">{errorMessage}</span>}
-        <p className="text-center text-gray-400">
+        {errorMessage && <span className="text-red-500 font-normal">{errorMessage}</span>}
+        <p className="text-center text-gray-400 font-normal">
           Already have an account ? <span> </span>
-          <a href="/login" className="text-blue-700">
+          <a href="/login" className="text-blue-700 font-normal">
             Login here.
           </a>
         </p>
+        </form>
       </div>
     </Layout>
   );
