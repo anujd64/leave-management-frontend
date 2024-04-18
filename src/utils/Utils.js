@@ -9,3 +9,80 @@ export function setLocalStorageItems (loginData,deptName) {
       localStorage.setItem("departmentName", deptName);
       return true;
   };
+export function validateDates(leaveRequest, setErrorMessage, holidays) {
+
+    const { startDate, endDate } = leaveRequest;
+
+     // Ensure start date and end date are not empty
+     if (!startDate || !endDate) {
+      setErrorMessage("Start date and end date are required");
+      return false;
+    }
+
+    const today = dayjs();
+
+    // Convert start and end dates to Day.js objects
+    const startDateObj = dayjs(startDate);
+    const endDateObj = dayjs(endDate);
+    const isStartLessThanToday = startDateObj.isBefore(today, "day");
+    const isEndLessThanToday = endDateObj.isBefore(today, "day");
+
+    // Check if start date or end date is less than today
+    if (isStartLessThanToday || isEndLessThanToday) {
+      setErrorMessage(
+        `${
+          isStartLessThanToday ? "start date" : "end date"
+        } cannot be less than today`
+      );
+      return false;
+    }
+
+    // Check if start date is after end date
+    if (startDateObj.isAfter(endDateObj, "day")) {
+      setErrorMessage("Start date cannot be after end date");
+      return false;
+    }
+
+    // Check if the difference between start and end dates is more than 7 days
+    const differenceInDays = endDateObj.diff(startDateObj, "day");
+    if (differenceInDays > 7) {
+      setErrorMessage("Maximum leave duration is 7 days");
+      return false;
+    }else if (differenceInDays < 1) {
+      setErrorMessage("Minimum leave duration is 1 day");
+      return false;
+    }
+
+    // Check if start date or end date is weekend
+    const isStartDateWeekend = [0, 6].includes(startDateObj.day());
+    const isEndDateWeekend = [0, 6].includes(endDateObj.day());
+    if (isStartDateWeekend || isEndDateWeekend) {
+      setErrorMessage(
+        `Leave cannot be applied for weekends, ${
+          isEndDateWeekend ? "end date" : "start date"
+        } is a weekend`
+      );
+      return false;
+    }
+
+    const isStartDateHoliday = holidays.includes(startDate);
+    const isEndDateHoliday = holidays.includes(endDate);
+
+    if (isStartDateHoliday || isEndDateHoliday) {
+      setErrorMessage(
+        `Leave cannot be applied for on holidays, ${
+          isEndDateHoliday ? "end date" : "start date"
+        } is a holiday`
+      );
+      return false;
+    }
+
+    if (leaveRequest.leaveTypeId === "") {
+      setErrorMessage("Select a Leave Type!");
+      return false;
+    }
+
+    console.log("Leave Request Data: ", leaveRequest);
+
+    return true;
+}
