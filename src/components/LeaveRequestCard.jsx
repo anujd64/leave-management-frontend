@@ -29,42 +29,49 @@ export default function LeaveRequestCard({
     setReason("");
   };
 
-
   // Function to filter out holidays and weekends from the leave period
-const filterHolidays = (startDate, endDate, holidays) => {
-  let filteredDates = [];
-  let currentDate = startDate;
-  while (currentDate <= endDate) {
-    if (!isWeekend(currentDate) && !isHoliday(currentDate, holidays)) {
-      filteredDates.push(currentDate);
+  const filterHolidays = (startDate, endDate, holidays) => {
+    let filteredDates = [];
+    let currentDate = startDate;
+    while (currentDate <= endDate) {
+      if (!isWeekend(currentDate) && !isHoliday(currentDate, holidays)) {
+        filteredDates.push(currentDate);
+      }
+      currentDate = currentDate.add(1, "day");
     }
-    currentDate = currentDate.add(1, 'day');
-  }
-  return filteredDates;
-};
+    return filteredDates;
+  };
 
-// Function to check if a given date is a weekend (Saturday or Sunday)
-const isWeekend = (date) => {
-  const dayOfWeek = date.day();
-  return dayOfWeek === 0 || dayOfWeek === 6;
-};
+  // Function to check if a given date is a weekend (Saturday or Sunday)
+  const isWeekend = (date) => {
+    const dayOfWeek = date.day();
+    return dayOfWeek === 0 || dayOfWeek === 6;
+  };
 
-// Function to check if a given date is a holiday
-const isHoliday = (date, holidays) => {
-  const dateString = date.format("YYYY-MM-DD");
-  return holidays.some(holiday => holiday.holidayDate === dateString);
-};
+  // Function to check if a given date is a holiday
+  const isHoliday = (date, holidays) => {
+    const dateString = date.format("YYYY-MM-DD");
+    return holidays.some((holiday) => holiday.holidayDate === dateString);
+  };
 
-const filteredLeaveDates = filterHolidays(dayjs(leave.startDate), dayjs(leave.endDate), holidayData);
+  const filteredLeaveDates = filterHolidays(
+    dayjs(leave.startDate),
+    dayjs(leave.endDate),
+    holidayData
+  );
 
-const leaveDuration = filteredLeaveDates.length;
+  const leaveDuration = filteredLeaveDates.length;
 
   return (
     <>
-      <div className="relative px-4 py-4 w-72 h-fit max-h-[400px] flex flex-col gap-3 bg-gray-200 rounded-lg justify-top items-center">
+      <div className="relative px-4 py-4 w-72 h-fit max-h-[540px] flex flex-col gap-3 bg-gray-200 rounded-lg justify-top items-center">
         <StatusIndicator status={leave.status} />
 
-        <LeaveDetails employeeDetails={employeeDetails} leave={leave} leaveDuration={leaveDuration} />
+        <LeaveDetails
+          employeeDetails={employeeDetails}
+          leave={leave}
+          leaveDuration={leaveDuration}
+        />
 
         {leave.status === "pending" && (
           <div className="flex flex-row gap-4 w-full justify-center">
@@ -84,15 +91,14 @@ const leaveDuration = filteredLeaveDates.length;
             </button>
           </div>
         )}
-      <RejectionModal
-        showModal={showModal}
-        handleInputChange={handleInputChange}
-        handleRejectClick={handleRejectClick}
-        reason={reason}
-        toggleModal={toggleModal}
-      />
+        <RejectionModal
+          showModal={showModal}
+          handleInputChange={handleInputChange}
+          handleRejectClick={handleRejectClick}
+          reason={reason}
+          toggleModal={toggleModal}
+        />
       </div>
-
     </>
   );
 }

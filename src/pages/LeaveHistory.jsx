@@ -9,6 +9,7 @@ export default function LeaveHistory() {
   const employeeId = useContext(GlobalContext).employeeId;
 
   const [leaveHistory, setLeaveHistory] = useState([]);
+  const [imageSelected, setImageSelected] = useState("");
 
 
   const myHeaders = new Headers();
@@ -71,6 +72,15 @@ export default function LeaveHistory() {
   return (
     <>
     <Layout>
+    {imageSelected && (
+      <div className="fixed top-0 left-0 z-80 p-8 w-screen h-screen bg-black/70 flex justify-center items-center object-cover z-50 backdrop-blur-sm"
+      onClick={() => setImageSelected(null)}>          
+          <img
+          src ={imageSelected} alt="" 
+          className="w-full h-full object-contain"
+          />
+        </div>
+    )}
       <div className="flex justify-center items-center w-full">
         <div className="flex flex-col h-[90vh] gap-4 px-4 w-[90%] scroll whitespace-nowrap overflow-y-auto">
           <div className="flex justify-between">
@@ -92,9 +102,12 @@ export default function LeaveHistory() {
           {leaveHistory.length > 0 ? (
             <>
               {leaveHistory.map((leave) => (
+
+                <div className="bg-gray-300 rounded-lg">
+
                 <div
                   key={leave.requestId}
-                  className=" grid grid-cols-5 py-4 text-center bg-gray-300 rounded-lg"
+                  className=" grid grid-cols-5 py-4 text-center"
                 >
                   <p>
                     {new Date(leave.startDate).toLocaleDateString("en-US", {
@@ -128,6 +141,22 @@ export default function LeaveHistory() {
                       <HelperToolTip text="Delete" />
                     </button>
                   </div>
+                </div>
+
+                <div className="flex flex-row flex-wrap items-center font-bold gap-4 px-8 py-2">
+                  <p>Attachments :</p>
+                  { leave.images.length > 0 && leave.images.map((image, index) => (
+                      <img
+                        key={index}
+                        src={image}
+                        alt="attachment"
+                        onClick={() => setImageSelected(image)}
+                        className="w-16 h-16 object-cover rounded-md"
+                      />
+                    ))
+
+                  }
+                </div>
                 </div>
               ))}
             </>
