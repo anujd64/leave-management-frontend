@@ -86,3 +86,24 @@ export function validateDates(leaveRequest, setErrorMessage, holidays) {
 
     return true;
 }
+// Function to fetch data from an API endpoint
+export const fetchData = async (url, options = {}) => {
+  try {
+    const response = await fetch(url, options);
+    return await response.json();
+  } catch (error) {
+    console.error(error);
+    return []; // Handle empty data on error
+  }
+};
+
+// Debounce function
+export const debounce = (func, delay) => {
+  let timer;
+  return (...args) => {
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+      func(...args);
+    }, delay);
+  };
+};
