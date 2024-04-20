@@ -4,13 +4,14 @@ import dayjs from "dayjs";
 import { FaXmark } from "react-icons/fa6";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { validateDates, fetchData, debounce } from "../utils/Utils";
+import { set } from "firebase/database";
 
 const LeaveRequestForm = () => {
   const [leaveTypes, setLeaveTypes] = useState([]);
   const [images, setImages] = useState([]);
-  const [imageLinks, setImageLinks] = useState([]);
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const [imageLinks, setImageLinks] = useState([]); 
   const token = useContext(GlobalContext).token;
   const empId = useContext(GlobalContext).employeeId;
   const createdAt = dayjs().format("YYYY-MM-DD");
@@ -35,15 +36,20 @@ const LeaveRequestForm = () => {
   const getHolidays = async () => {
     const myHeaders = new Headers();
     myHeaders.append("Authorization", `Bearer ${token}`);
-  
+
     const requestOptions = {
       method: "GET",
       headers: myHeaders,
     };
-  
-    const holidays = await fetchData("http://localhost:8080/company-holidays/all", requestOptions);
+
+    const holidays = await fetchData(
+      "http://localhost:8080/company-holidays/all",
+      requestOptions
+    );
     holidays.sort((a, b) => new Date(a.holidayDate) - new Date(b.holidayDate));
-    const filteredHolidays = holidays.filter((holiday) => new Date(holiday.holidayDate) >= new Date());
+    const filteredHolidays = holidays.filter(
+      (holiday) => new Date(holiday.holidayDate) >= new Date()
+    );
     setHolidayData(filteredHolidays);
     console.log(filteredHolidays);
   };
@@ -53,119 +59,113 @@ const LeaveRequestForm = () => {
   }, []);
 
   //get list of types of leaves
-  const getLeaveTypes = async () =>{
-      const types = await fetchData("http://localhost:8080/leave-types/all")
-      setLeaveTypes(types);
-  }
+  const getLeaveTypes = async () => {
+    const types = await fetchData("http://localhost:8080/leave-types/all");
+    setLeaveTypes(types);
+  };
   useEffect(() => {
     getLeaveTypes();
   }, []);
 
-  //set image links in leave request
-  useEffect(() => {
-    setLeaveRequest((prevState) => ({
-      ...prevState,
-      images: imageLinks,
-    }));
-  }, [imageLinks]);
-
-  const debouncedSubmit = debounce(() => {
+  const debouncedSubmit = debounce(async () => {
     if (!isSubmitting) {
       setIsSubmitting(true);
+  
+      try {
+        let uploadedImageUrls = [];
+        if (images.length > 0) {
+          setSuccessMessage("Uploading images...");
+          uploadedImageUrls = await handleUpload();
 
-      const myHeaders = new Headers();
-      myHeaders.append("authorization", `Bearer ${token}`);
-      myHeaders.append("Content-Type", "application/json");
+          console.log(uploadedImageUrls);
 
-      const requestOptions = {
-        method: "POST",
-        headers: myHeaders,
-        body: JSON.stringify(leaveRequest),
-      };
-
-      const createLeave = () =>
-        fetch("http://localhost:8080/leaves/create-leave", requestOptions)
-          .then((response) => {
-            return response.json();
-          })
-          .then((result) => {
-            if (result.errMsg) {
-              setErrorMessage(result.errMsg);
-              return;
-            }
-            console.log(result);
-            setSuccessMessage("Leave request submitted successfully.");
-
+          if (uploadedImageUrls.length === 0) {
+            setErrorMessage("An error occurred while uploading images.");
             setIsSubmitting(false);
-          })
-          .catch((error) => {
-            setIsSubmitting(false);
-            setErrorMessage(error.errMsg || "Unknown error occurred");
-            console.error(error);
-          });
+            return;
+          }
+        }
+  
+        // setLeaveRequest((prevState) => ({
+        //   ...prevState,
+        //   images: uploadedImageUrls,
+        // }));
 
-      if (images.length > 0) {
-        setSuccessMessage("Uploading images...");
-        
-        handleUpload()
-          .then((isUploaded) => {
-            if (isUploaded) {
-              createLeave();
-            } else {
-              setErrorMessage("An error occurred while uploading images.");
-              setIsSubmitting(false);
-            }
-          })
-          .catch((error) => {
-            console.error("Error uploading images:", error);
-            setErrorMessage(
-              "An error occurred while uploading images. Please try again."
-            );
-            setIsSubmitting(false);
-          });
-      } else {
-        createLeave();
+        // Update the images in the leave request object directly
+        leaveRequest.images = uploadedImageUrls;
+  
+        const myHeaders = new Headers();
+        myHeaders.append("authorization", `Bearer ${token}`);
+        myHeaders.append("Content-Type", "application/json");
+  
+        const requestOptions = {
+          method: "POST",
+          headers: myHeaders,
+          body: JSON.stringify(leaveRequest),
+        };
+  
+        const response = await fetch("http://localhost:8080/leaves/create-leave", requestOptions);
+        const result = await response.json();
+        if (result.errMsg) {
+          setErrorMessage(result.errMsg);
+          setIsSubmitting(false);
+          return;
+        }
+  
+        console.log(result);
+        setSuccessMessage("Leave request submitted successfully.");
+      } catch (error) {
+        setErrorMessage(error.errMsg || "Unknown error occurred");
+        console.error(error);
+      } finally {
+        setIsSubmitting(false);
       }
-      setIsSubmitting(false);
     }
   }, 500);
+  
+  
 
   // Image upload functions
   //get storage reference to store images in firebase bucket
-  const storageRef = getStorage();
-  const folderName = empId;
-  const handleUpload = async () => {
-    try {
-      const uploadTasks = images.map((image, index) => {
-        const imageName = `image_${index + 1}`;
-        const imageRef = ref(storageRef, `${folderName}/${imageName}`);
-        return uploadBytes(imageRef, image);
-      });
 
-      const uploadResults = await Promise.all(uploadTasks);
-
-      const imageUrls = await Promise.all(
-        uploadResults.map(async (result) => {
-          return await getDownloadURL(result.ref);
-        })
-      );
-
-      handleSetImageLinks(imageUrls);
-      console.log("Image URLs:", imageUrls);
-      setSuccessMessage("Images uploaded successfully!");
-
-      return true;
-
-    } catch (error) {
-      console.error("Error uploading images:", error);
-      setErrorMessage(
-        "An error occurred while uploading images. Please try again."
-      );
-
-      return false;
-
-    }
+  const handleImageLinks = (imageUrls) => {
+    setLeaveRequest((prevState) => ({
+        ...prevState,
+        images: imageUrls,
+      }));
   };
+  
+  const storageRef = getStorage();
+  const folderName =
+    empId + "/" + leaveRequest.startDate + "-" + leaveRequest.endDate;
+
+    const handleUpload = async () => {
+      try {
+        const uploadTasks = images.map((image, index) => {
+          const imageName = `image_${index + 1}`;
+          const imageRef = ref(storageRef, `${folderName}/${imageName}`);
+          return uploadBytes(imageRef, image);
+        });
+    
+        const uploadResults = await Promise.all(uploadTasks);
+    
+        const imageUrls = await Promise.all(
+          uploadResults.map(async (result) => {
+            return await getDownloadURL(result.ref);
+          })
+        );
+    
+        // Return the image URLs for further processing
+        return imageUrls;
+      } catch (error) {
+        console.error("Error uploading images:", error);
+        setErrorMessage(
+          "An error occurred while uploading images. Please try again."
+        );
+    
+        return [];
+      }
+    };
 
   const removeImage = (index) => {
     setImages((prevImages) => prevImages.filter((image, i) => i !== index));
@@ -184,10 +184,6 @@ const LeaveRequestForm = () => {
     setImages((prevImages) => [...prevImages, ...files]);
   };
 
-  const handleSetImageLinks = (urls) => {
-    setImageLinks(urls);
-  };
-
   const handleChange = (e) => {
     const { name, value } = e.target;
     setLeaveRequest((prevState) => ({
@@ -204,6 +200,8 @@ const LeaveRequestForm = () => {
 
     const validDates = validateDates(
       leaveRequest,
+      leaveTypes,
+      images,
       setErrorMessage,
       holidays
     );
@@ -234,8 +232,6 @@ const LeaveRequestForm = () => {
     setSuccessMessage("");
   };
 
-  
-
   return (
     <>
       <form
@@ -261,7 +257,8 @@ const LeaveRequestForm = () => {
                   key={leaveType.leaveTypeId}
                   value={leaveType.leaveTypeId}
                 >
-                  {leaveType.leaveTypeName}: {leaveType.defaultAllowance} days
+                  {leaveType.leaveTypeName}
+                  {/* : {leaveType.defaultAllowance} days */}
                 </option>
               ))}
           </select>
@@ -304,7 +301,6 @@ const LeaveRequestForm = () => {
             className="mt-1 focus:ring-blue-500 focus:border-blue-500 px-2 py-3 border block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
             required
           ></textarea>
-
           <label
             htmlFor="imageUpload"
             className="block text-sm font-medium text-gray-700"
@@ -319,6 +315,7 @@ const LeaveRequestForm = () => {
             multiple
             accept="image/*"
           />
+
           <div className="flex flex-row flex-wrap w-full gap-4">
             {images.map((image, index) => (
               <>

@@ -64,7 +64,7 @@ export default function LeaveDetails({
         </div>
       )}
 
-      {leave.images.length > 0 && (
+      {leave.images && leave.images.length > 0 && (
         <div className="flex flex-col w-full border border-gray-500 rounded-md">
           <p className="p-2">Attachments</p>
           <span className="h-[1px] w-full bg-slate-500"></span>
