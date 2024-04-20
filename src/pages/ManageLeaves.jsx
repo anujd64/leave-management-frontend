@@ -2,6 +2,8 @@ import Layout from "../components/Layout";
 import React, { useContext, useEffect, useState } from "react";
 import GlobalContext from "../context/GlobalContext";
 import LeaveRequestCard from "../components/LeaveRequestCard";
+import { MdRefresh } from "react-icons/md";
+import HelperToolTip from "../components/HelperToolTip";
 
 export default function ManageLeaves() {
   const token = useContext(GlobalContext).token;
@@ -14,12 +16,12 @@ export default function ManageLeaves() {
   const [holidayData, setHolidayData] = useState([]);
 
   const myHeaders = new Headers();
-    myHeaders.append("Authorization", `Bearer ${token}`);
+  myHeaders.append("Authorization", `Bearer ${token}`);
 
-    const requestOptions = {
-      method: "GET",
-      headers: myHeaders,
-    };
+  const requestOptions = {
+    method: "GET",
+    headers: myHeaders,
+  };
 
   const getHolidays = async () =>
     fetch("http://localhost:8080/company-holidays/all", requestOptions)
@@ -110,7 +112,7 @@ export default function ManageLeaves() {
           )
         );
 
-        setFilterName("all")
+        setFilterName("all");
       })
       .catch((error) => console.error(error));
   };
@@ -154,8 +156,7 @@ export default function ManageLeaves() {
           )
         );
 
-        setFilterName("all")
-
+        setFilterName("all");
       })
       .catch((error) => console.error(error));
   };
@@ -172,7 +173,7 @@ export default function ManageLeaves() {
         setFilteredLeaveHistory(filteredLeaveHistory);
       }
     };
-  }
+  };
 
   // const handleDelete = (leaveId) => {
   //   const myHeaders = new Headers();
@@ -201,61 +202,80 @@ export default function ManageLeaves() {
   //     .catch((error) => console.error(error));
   // };
 
+  const handleRefresh = () => {
+    getLeaveHistory();
+  };
+
   return (
     <Layout>
       <div className="flex flex-col w-full h-full px-8 py-2 select-none">
         <div className="flex flex-col flex-wrap w-full h-full gap-4">
-          <p className="text-2xl text-white font-bold w-full text-start">
-            Manage Leaves
-          </p>
+          <div className="flex justify-between">
+            <p className="text-2xl text-white font-bold w-full text-start">
+              Manage Leaves
+            </p>
+
+            <button
+              onClick={handleRefresh}
+              className="relative group text-white"
+            >
+              <MdRefresh />
+              <HelperToolTip text="Refresh" />
+            </button>
+          </div>
+
           <div className="flex flex-row gap-4">
-            <p className={`self-start rounded-full border text-xs w-fit h-fit px-4 py-2 border-gray-200 text-gray-300 cursor-pointer
+            <p
+              className={`self-start rounded-full border text-xs w-fit h-fit px-4 py-2 border-gray-200 text-gray-300 cursor-pointer
             ${filterName === "all" ? "bg-gray-300 text-gray-800" : ""}`}
-            onClick={filterLeaveHistory("all")}
+              onClick={filterLeaveHistory("all")}
             >
               All
             </p>
-            <p className={`self-start rounded-full border text-xs w-fit h-fit px-4 py-2 border-green-300 text-green-500 cursor-pointer ${filterName === "approved" ? "bg-green-300 text-green-800" : ""}`}
-            onClick={filterLeaveHistory("approved")}
+            <p
+              className={`self-start rounded-full border text-xs w-fit h-fit px-4 py-2 border-green-300 text-green-500 cursor-pointer ${
+                filterName === "approved" ? "bg-green-300 text-green-800" : ""
+              }`}
+              onClick={filterLeaveHistory("approved")}
             >
               Approved
             </p>
-            <p className={`self-start rounded-full border text-xs w-fit h-fit px-4 py-2 border-yellow-300 text-yellow-500 cursor-pointer
+            <p
+              className={`self-start rounded-full border text-xs w-fit h-fit px-4 py-2 border-yellow-300 text-yellow-500 cursor-pointer
             ${filterName === "pending" ? "bg-yellow-300 text-yellow-800" : ""}`}
-            onClick={filterLeaveHistory("pending")}
+              onClick={filterLeaveHistory("pending")}
             >
               Pending
             </p>
-            <p className={`self-start rounded-full border text-xs w-fit h-fit px-4 py-2 border-red-300 text-red-500 cursor-pointer
+            <p
+              className={`self-start rounded-full border text-xs w-fit h-fit px-4 py-2 border-red-300 text-red-500 cursor-pointer
             ${filterName === "rejected" ? "bg-red-300 text-red-800" : ""}`}
-            onClick={filterLeaveHistory("rejected")}
+              onClick={filterLeaveHistory("rejected")}
             >
               Rejected
             </p>
           </div>
 
           <div className="flex flex-row gap-4 flex-wrap w-full justify-evenly">
-            
-          {filteredLeaveHistory.length > 0 ? (
-            <>
-              {filteredLeaveHistory.map((leave, idx) => (
-                <LeaveRequestCard
-                  key={idx}
-                  employeeDetails={empDetails[leave.employeeId]}
-                  leave={leave}
-                  holidayData={holidayData}
-                  handleApprove={handleApprove}
-                  handleReject={handleReject}
-                />
-              ))}
-            </>
-          ) : (
-            <p className="text-zinc-400 py-4 text-center">
-              No leave requests to manage
-            </p>
-          )}
+            {filteredLeaveHistory.length > 0 ? (
+              <>
+                {filteredLeaveHistory.map((leave, idx) => (
+                  <LeaveRequestCard
+                    key={idx}
+                    employeeDetails={empDetails[leave.employeeId]}
+                    leave={leave}
+                    holidayData={holidayData}
+                    handleApprove={handleApprove}
+                    handleReject={handleReject}
+                  />
+                ))}
+              </>
+            ) : (
+              <p className="text-zinc-400 py-4 text-center">
+                No leave requests to manage
+              </p>
+            )}
           </div>
-
         </div>
       </div>
     </Layout>
