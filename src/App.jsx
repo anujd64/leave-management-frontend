@@ -9,8 +9,26 @@ import Leave from './pages/Leave'
 import ManageLeaves from './pages/ManageLeaves'
 import Profile from './pages/Profile'
 import Settings from './pages/Settings'
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyD-UeigoBhhJNCUjPTONl7lRkCUQHHV824",
+  authDomain: "leave-management-38c55.firebaseapp.com",
+  projectId: "leave-management-38c55",
+  storageBucket: "leave-management-38c55.appspot.com",
+  messagingSenderId: "726174151709",
+  appId: "1:726174151709:web:b994a53e11bab00e91c2f4"
+};
+
+// Initialize Firebase
 
 function App() {
+
+const app = initializeApp(firebaseConfig);
 
   const router = createBrowserRouter([
     {
