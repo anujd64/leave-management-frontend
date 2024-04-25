@@ -79,7 +79,7 @@ function Sidebar() {
               >
                 {val.title}
               </div>}
-              <HelperToolTip className="left-16 -top-3 z-50 hidden" text={val.title} />
+              {/* <HelperToolTip className="left-16 -top-3 z-50 hidden" text={val.title} /> */}
             </NavLink>
           ))}
         </div>
