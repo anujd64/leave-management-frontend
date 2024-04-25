@@ -125,7 +125,7 @@ export default function LeaveHistory() {
               <p className="text-2xl text-white font-bold w-full self-start">
                 Leave History
               </p>
-              <button onClick={handleRefresh} className="relative group text-white">
+              <button onClick={handleRefresh} className="relative group">
                 <MdRefresh />
                 <HelperToolTip text="Refresh" />
               </button>
