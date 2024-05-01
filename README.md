@@ -2,6 +2,8 @@
 
 This is the frontend project for the Leave Management System, developed using JavaScript with React and Vite, along with Tailwind CSS for styling. It provides a user-friendly interface for managing employee leaves efficiently.
 
+[Backend Repository](https://github.com/anujd64/leave-management-backend)
+
 ## Features
 
 - User-friendly interface built with React
