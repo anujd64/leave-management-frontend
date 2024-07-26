@@ -19,7 +19,7 @@ This is the frontend project for the Leave Management System, developed using Ja
 - Tailwind CSS
 - Firebase Storage
 
-##Screenshots
+## Screenshots
 
 
 <img src="./Screenshots/1.png?raw=true" style="width: 100%;margin:16px;" />&nbsp;&nbsp;
